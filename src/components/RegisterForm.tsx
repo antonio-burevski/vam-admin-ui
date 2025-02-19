@@ -37,19 +37,21 @@ const RegisterForm = () => {
 
   // Handle form submission
   const handleSubmit = async (values: typeof form.values) => {
-    const success = await register(
+    const response = await register(
       values.username,
       values.email,
       values.password
     );
-    //change this when implemented
-    if (!success) {
+  
+    if (response.success) {
       console.log("Registration successful");
-      // Navigate to the validation form, passing email as state
       navigate("/validate", { state: { email: values.email } });
+    } else {
+      console.error("Registration failed:", response.message);
+      alert(response.message);
     }
   };
-
+  
   return (
     <Center style={{ height: "100vh" }}>
       <Paper

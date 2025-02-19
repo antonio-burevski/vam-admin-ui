@@ -10,10 +10,29 @@ import {
 } from "@mantine/core";
 import classes from "../assets/Login.module.css";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useAuthService } from "../api/authApi"; // Assuming your auth service has the login function
+import { useAuth } from "../hooks/useAuth";
 
 export function AuthenticationForm() {
-  
   const navigate = useNavigate();
+  const { login } = useAuthService(); // Use the login method from the auth service
+  const { getUser } = useAuth(); // Access getUser from AuthContext
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    const success = await login(username, password);
+    if (success) {
+      await getUser(); // Ensure user data is loaded before navigation
+      navigate("/"); // Now navigate only after user is set
+    } else {
+      setError("Invalid credentials. Please try again.");
+    }
+  };
 
   return (
     <div className={classes.wrapper}>
@@ -22,22 +41,47 @@ export function AuthenticationForm() {
           Welcome! Please Login to continue.
         </Title>
 
+        {/* username Input */}
         <TextInput
           label="Email address"
           placeholder="hello@gmail.com"
           size="md"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
+
+        {/* Password Input */}
         <PasswordInput
           label="Password"
           placeholder="Your password"
           mt="md"
           size="md"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
-        <Checkbox label="Keep me logged in" mt="xl" size="md" />
-        <Button fullWidth mt="xl" size="md">
+
+        {/* Remember me Checkbox */}
+        <Checkbox
+          label="Keep me logged in"
+          mt="xl"
+          size="md"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+        />
+
+        {/* Error message */}
+        {error && (
+          <Text size="sm" mt="md">
+            {error}
+          </Text>
+        )}
+
+        {/* Submit Button */}
+        <Button fullWidth mt="xl" size="md" onClick={handleSubmit}>
           Login
         </Button>
 
+        {/* Register link */}
         <Text ta="center" mt="md">
           Don&apos;t have an account?{" "}
           <Anchor<"a"> href="#" fw={700} onClick={() => navigate("/register")}>

@@ -8,6 +8,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [cookies] = useCookies(["token"]);
   const isAuthenticated = !!cookies.token; // Check if the token exists
+  console.log(isAuthenticated)
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 };

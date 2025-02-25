@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import RegisterForm from "./components/RegisterForm";
-import ProtectedRoute from "./components/core/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthenticationForm } from "./components/AuthenticationForm";
 import ValidationForm from "./components/ValidationForm";
 import { Navbar } from "./components/core/Navbar";
@@ -10,22 +10,21 @@ import Account from "./components/core/Account";
 import Dashboard from "./components/core/Dashboard";
 import Settings from "./components/core/Settings";
 import { useAuth } from "./hooks/useAuth";
+import Products from "./components/core/Products";
 
 function App() {
   return (
     <MantineProvider defaultColorScheme="dark">
       <Router>
-        {/* ✅ Move AuthProvider here so ALL routes have access to auth */}
         <AuthProvider>
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<AuthenticationForm />} />
             <Route path="/register" element={<RegisterForm />} />
             <Route path="/validate" element={<ValidationForm />} />
-
             {/* Private Routes */}
             <Route
-              path="/"
+              path="*"
               element={
                 <ProtectedRoute>
                   <AuthenticatedApp />
@@ -48,9 +47,21 @@ const AuthenticatedApp = () => {
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/account" element={<Account />} />
+        {user.permissions.includes("can_view_dashboard") && (
+          <Route path="/" element={<Dashboard />} />
+        )}
+
+        {user.permissions.includes("can_view_products") && (
+          <Route path="/products" element={<Products />} />
+        )}
+
+        {user.permissions.includes("can_view_account") && (
+          <Route path="/account" element={<Account />} />
+        )}
+
+        {user.permissions.includes("can_view_settings") && (
+          <Route path="/settings" element={<Settings />} />
+        )}
       </Routes>
     </>
   );

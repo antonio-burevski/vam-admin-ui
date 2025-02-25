@@ -9,7 +9,9 @@ export const useAuthService = () => {
   const navigate = useNavigate();
 
   // Check if the user is already logged in
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!cookies.token);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    !!cookies.token
+  );
 
   // Register method (Initial Step: Sends OTP)
   const register = async (
@@ -42,13 +44,11 @@ export const useAuthService = () => {
   // OTP Verification Method
   const verifyOtp = async (email: string, otp: string) => {
     try {
-      // No need for token here, as the route is public
       const response = await axiosInstance.post("/core/verify-otp/", {
         email,
         otp,
       });
 
-      // Set the token in cookies upon successful OTP verification
       const expires = new Date();
       expires.setDate(expires.getDate() + 7); // Set cookie expiration date to 7 days from now
 
@@ -59,7 +59,7 @@ export const useAuthService = () => {
         sameSite: "strict",
       });
 
-      // Redirect to the homepage or dashboard
+      // Redirect to dashboard
       navigate("/");
 
       return { success: true, message: "Account activated successfully" };
@@ -97,13 +97,12 @@ export const useAuthService = () => {
           sameSite: "strict",
         });
 
-        // Store the refresh token in an HTTP-only cookie (set this server-side, if needed)
         document.cookie = `refresh_token=${refreshToken}; path=/; expires=${expires.toUTCString()}; secure; HttpOnly; SameSite=Strict`;
 
-        return true; // Indicate login was successful
+        return true;
       }
 
-      return false; // If no token in response, return false
+      return false;
     } catch (error) {
       console.error("Login failed:", error);
       return false;
@@ -117,10 +116,8 @@ export const useAuthService = () => {
     navigate("/login"); // Redirect to login page after logout
   };
 
-  // Get user profile (requires authentication)
   const getUserProfile = async () => {
     try {
-      // Only authenticated requests
       const response = await axiosInstance.get("/core/user-profile/");
       return { success: true, data: response.data };
     } catch (error: any) {
@@ -129,14 +126,43 @@ export const useAuthService = () => {
     }
   };
 
-  // Expose the authentication methods
+  const requestPermission = async (permission_codename: string) => {
+    try {
+      const response = await axiosInstance.post("/core/request-permission/", {
+        permission: permission_codename,
+      });
+  
+      return {
+        success: true,
+        status: response.status,
+        message: response.data.message,
+      };
+    } catch (error: any) {
+      if (error.response) {
+        return {
+          success: false,
+          status: error.response.status, 
+          message: error.response.data.error || "An error occurred",
+        };
+      } else {
+        return {
+          success: false,
+          status: 500,
+          message: "Network error, please try again later.",
+        };
+      }
+    }
+  };
+  
+
   return {
     register,
-    verifyOtp, // Add OTP verification method
+    verifyOtp,
     login,
     logout,
-    getUserProfile, // Add profile method
+    getUserProfile,
+    requestPermission,
     isAuthenticated,
-    setIsAuthenticated
+    setIsAuthenticated,
   };
 };

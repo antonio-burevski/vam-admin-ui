@@ -43,7 +43,7 @@ export function AuthenticationForm() {
 
         {/* username Input */}
         <TextInput
-          label="Email address"
+          label="Username"
           placeholder="hello@gmail.com"
           size="md"
           value={username}

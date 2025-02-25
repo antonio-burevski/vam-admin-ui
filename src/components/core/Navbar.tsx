@@ -1,89 +1,131 @@
+import { Button, Group, Notification } from "@mantine/core";
 import { useState } from "react";
-import { Code, Group } from "@mantine/core";
-import { RiDashboard2Line, RiLogoutBoxLine } from "react-icons/ri";
-import { GoGraph } from "react-icons/go";
-import { IoNewspaper } from "react-icons/io5";
 import {
-  MdOutlineProductionQuantityLimits,
-  MdOutlineDiscount,
+  MdAccountCircle,
   MdOutlineAccountCircle,
+  MdOutlineEmail,
+  MdOutlineProductionQuantityLimits,
   MdOutlineSettings,
 } from "react-icons/md";
-import { SiBrandfolder } from "react-icons/si";
-import { SiEsotericsoftware } from "react-icons/si";
-import classes from "../../assets/Navbar.module.css";
+import { RiDashboard2Line, RiLogoutBoxLine } from "react-icons/ri";
 import { useAuthService } from "../../api/authApi";
+import classes from "../../assets/Navbar.module.css";
+import { useAuth } from "../../hooks/useAuth";
+import RequestAccessModal from "./RequestAccessModal.tsx";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const data = [
-  { link: "", label: "Dashboard", icon: RiDashboard2Line },
-  { link: "", label: "Page", icon: IoNewspaper },
-  { link: "", label: "Products", icon: MdOutlineProductionQuantityLimits },
-  { link: "", label: "Discounts", icon: MdOutlineDiscount },
-  { link: "", label: "Statistics", icon: GoGraph },
-  { link: "", label: "Account", icon: MdOutlineAccountCircle },
-  { link: "", label: "Brand", icon: SiBrandfolder },
-  { link: "", label: "Settings", icon: MdOutlineSettings },
+// Define menu items with required permissions
+const menuItems = [
+  {
+    link: "/",
+    label: "Dashboard",
+    icon: RiDashboard2Line,
+    permission: "can_view_dashboard",
+  },
+  {
+    link: "/products",
+    label: "Products",
+    icon: MdOutlineProductionQuantityLimits,
+    permission: "can_view_products",
+  },
+  {
+    link: "/account",
+    label: "Account",
+    icon: MdOutlineAccountCircle,
+    permission: "can_view_account",
+  },
+  {
+    link: "/settings",
+    label: "Settings",
+    icon: MdOutlineSettings,
+    permission: "can_view_settings",
+  },
 ];
 
 export function Navbar() {
-  const [active, setActive] = useState("Dashboard");
-//   const { user } = useAuth();
+  const { user } = useAuth();
   const { logout } = useAuthService();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [notification, setNotification] = useState<
+    { status: boolean; msg: string } | undefined
+  >(undefined);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hangleLogout = (event: any) => {
+  const handleLogout = (event: React.MouseEvent) => {
     event.preventDefault();
     logout();
   };
 
-  const links = data.map((item) => (
-    <a
-      className={classes.link}
-      data-active={item.label === active || undefined}
-      href={item.link}
-      key={item.label}
-      onClick={(event) => {
-        event.preventDefault();
-        setActive(item.label);
-      }}
-    >
-      <item.icon className={classes.linkIcon} stroke={"1.5"} />
-      <span>{item.label}</span>
-    </a>
-  ));
+  const renderNotification = () => {
+    if (!notification) return null;
+    return (
+      <Notification
+        color={notification.status ? "green" : "red"}
+        title={notification.status ? "Success" : "Error"}
+      >
+        {notification.msg}
+      </Notification>
+    );
+  };
+
+  const filteredMenuItems = menuItems.filter((item) =>
+    user?.permissions.includes(item.permission)
+  );
 
   return (
-    <nav className={classes.navbar}>
-      <div className={classes.navbarMain}>
-        <Group className={classes.header} justify="space-between">
-          <SiEsotericsoftware /> VAM Software
-          <Code fw={700}>v3.1.2</Code>
-        </Group>
-        {/* <Group className={classes.header} justify="space-between">
-          <MdAccountCircle /> {user?.username}
-        </Group> */}
-        {links}
-      </div>
+    <>
+      <nav className={classes.navbar}>
+        <div className={classes.navbarMain}>
+          <Group className={classes.header}>
+            <span style={{ display: "inline-flex", alignItems: "center" }}>
+              <MdAccountCircle style={{ margin: "3px" }} /> {user?.username}
+            </span>
+            <span style={{ display: "inline-flex", alignItems: "center" }}>
+              <MdOutlineEmail style={{ margin: "3px", paddingTop: "5px" }} />
+              <span>{user?.email}</span>
+            </span>
+          </Group>
 
-      <div className={classes.footer}>
-        {/* <a
-          href="#"
-          className={classes.link}
-          onClick={(event) => event.preventDefault()}
-        >
-          <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
-          <span>Change account</span>
-        </a> */}
+          {filteredMenuItems.map((item) => (
+            <a
+              key={item.label}
+              className={classes.link}
+              data-active={location.pathname === item.link || undefined}
+              onClick={(event) => {
+                event.preventDefault();
+                navigate(item.link);
+              }}
+            >
+              <item.icon className={classes.linkIcon} stroke={"1.5"} />
+              <span>{item.label}</span>
+            </a>
+          ))}
 
-        <a
-          href="#"
-          className={classes.link}
-          onClick={(event) => hangleLogout(event)}
-        >
-          <RiLogoutBoxLine className={classes.linkIcon} stroke={"1.5"} />
-          <span>Logout</span>
-        </a>
-      </div>
-    </nav>
+          <Button
+            fullWidth
+            mt="md"
+            variant="light"
+            onClick={() => setModalOpen(true)}
+          >
+            Request Access
+          </Button>
+        </div>
+
+        <div className={classes.footer}>
+          <a href="#" className={classes.link} onClick={handleLogout}>
+            <RiLogoutBoxLine className={classes.linkIcon} stroke={"1.5"} />
+            <span>Logout</span>
+          </a>
+        </div>
+      </nav>
+
+      <RequestAccessModal
+        opened={modalOpen}
+        onClose={() => setModalOpen(false)}
+        setNotification={setNotification}
+      />
+      {renderNotification()}
+    </>
   );
 }

@@ -7,8 +7,8 @@
   background-image: url("login_page_bg.png");
   background-size: cover;
   background-position: center;
-  background-attachment: fixed; /* Ensures the background doesn't scroll */
-  overflow: hidden; /* Prevent scrolling */
+  background-attachment: fixed;
+  overflow: hidden;
 }
 
 /* Form */
@@ -16,7 +16,7 @@
   /* background-color: white;  */
   /* border-right: 1px solid var(--mantine-color-gray-3); */
   max-width: 450px;
-  min-height: 300px; /* Optional: to ensure the form has enough height */
+  min-height: 300px;
   padding-top: 80px;
   padding-bottom: 20px;
   display: flex;
@@ -31,17 +31,16 @@
   font-family: "Greycliff CF", var(--mantine-font-family);
 }
 
-/* Responsive Adjustment for small screens */
 @media (max-width: var(--mantine-breakpoint-sm)) {
   .wrapper {
-    background-attachment: scroll; /* Background scrolls on small screens */
-    justify-content: flex-start; /* Align the form at the top */
+    background-attachment: scroll;
+    justify-content: flex-start;
   }
 
   .form {
-    width: 100%; /* Form takes full width on small screens */
-    height: 100vh; /* Form takes full height on small screens */
-    padding-top: 50px; /* Optional: Adjust for better spacing */
-    border-right: none; /* No border on small screens */
+    width: 100%;
+    height: 100vh;
+    padding-top: 50px;
+    border-right: none;
   }
 }

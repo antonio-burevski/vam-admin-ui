@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { useAuthService } from "../api/authApi";
-import { IUserProfile } from "../types/api.types";
+import { IUserProfile } from "../utils/types/api.types";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { getUserProfile, isAuthenticated } = useAuthService();

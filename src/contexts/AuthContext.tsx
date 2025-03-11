@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { IUserProfile } from "../types/api.types";
+import { IUserProfile } from "../utils/types/api.types";
 
 interface AuthContextType {
   user: IUserProfile | null;

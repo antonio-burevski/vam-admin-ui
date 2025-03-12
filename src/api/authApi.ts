@@ -8,10 +8,10 @@ export const useAuthService = () => {
     const [cookies, setCookie, removeCookie] = useCookies(["token"]); // Access token from cookies
     const navigate = useNavigate();
 
-  // Check if the user is already logged in
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    !!cookies.token
-  );
+    // Check if the user is already logged in
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+        !!cookies.token
+    );
 
     // Register method (Initial Step: Sends OTP)
     const register = async (
@@ -41,13 +41,6 @@ export const useAuthService = () => {
         }
     };
 
-  // OTP Verification Method
-  const verifyOtp = async (email: string, otp: string) => {
-    try {
-      const response = await axiosInstance.post("/core/verify-otp/", {
-        email,
-        otp,
-      });
     // OTP Verification Method
     const verifyOtp = async (email: string, otp: string) => {
         try {
@@ -57,8 +50,8 @@ export const useAuthService = () => {
                 otp,
             });
 
-      const expires = new Date();
-      expires.setDate(expires.getDate() + 7); // Set cookie expiration date to 7 days from now
+            const expires = new Date();
+            expires.setDate(expires.getDate() + 7); // Set cookie expiration date to 7 days from now
             // Set the token in cookies upon successful OTP verification
 
             setCookie("token", response.data.token, {
@@ -68,8 +61,8 @@ export const useAuthService = () => {
                 sameSite: "strict",
             });
 
-      // Redirect to dashboard
-      navigate("/");
+            // Redirect to dashboard
+            navigate("/");
             // Redirect to the homepage or dashboard
             navigate("/");
 
@@ -88,14 +81,6 @@ export const useAuthService = () => {
 
     // Login method
     const login = async (username: string, password: string) => {
-        // Define routes where login should not be triggered
-        const excludedRoutes = ['/register', '/login', '/some-other-route'];
-
-        // Check if the current route is in the excludedRoutes array
-        if (excludedRoutes.includes(window.location.pathname)) {
-            console.log("Login not allowed on this route:", window.location.pathname);
-            return false; // Skip login logic if on excluded route
-        }
 
         try {
             const response = await axiosInstance.post("/core/login/", {
@@ -119,10 +104,10 @@ export const useAuthService = () => {
                     sameSite: "strict",
                 });
 
-        document.cookie = `refresh_token=${refreshToken}; path=/; expires=${expires.toUTCString()}; secure; HttpOnly; SameSite=Strict`;
+                document.cookie = `refresh_token=${refreshToken}; path=/; expires=${expires.toUTCString()}; secure; HttpOnly; SameSite=Strict`;
 
-        return true;
-      }
+                return true;
+            }
             setIsAuthenticated(false);
             return false;
         } catch (error) {
@@ -139,53 +124,52 @@ export const useAuthService = () => {
         navigate("/login"); // Redirect to login page after logout
     };
 
-  const getUserProfile = async () => {
-    try {
-      const response = await axiosInstance.get("/core/user-profile/");
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      console.error("Failed to fetch user profile:", error);
-      return { success: false, message: "Failed to fetch user profile" };
-    }
-  };
+    const getUserProfile = async () => {
+        try {
+            const response = await axiosInstance.get("/core/user-profile/");
+            return {success: true, data: response.data};
+        } catch (error: any) {
+            console.error("Failed to fetch user profile:", error);
+            return {success: false, message: "Failed to fetch user profile"};
+        }
+    };
 
-  const requestPermission = async (permission_codename: string) => {
-    try {
-      const response = await axiosInstance.post("/core/request-permission/", {
-        permission: permission_codename,
-      });
-  
-      return {
-        success: true,
-        status: response.status,
-        message: response.data.message,
-      };
-    } catch (error: any) {
-      if (error.response) {
-        return {
-          success: false,
-          status: error.response.status, 
-          message: error.response.data.error || "An error occurred",
-        };
-      } else {
-        return {
-          success: false,
-          status: 500,
-          message: "Network error, please try again later.",
-        };
-      }
-    }
-  };
-  
+    const requestPermission = async (permission_codename: string) => {
+        try {
+            const response = await axiosInstance.post("/core/request-permission/", {
+                permission: permission_codename,
+            });
 
-  return {
-    register,
-    verifyOtp,
-    login,
-    logout,
-    getUserProfile,
-    requestPermission,
-    isAuthenticated,
-    setIsAuthenticated,
-  };
+            return {
+                success: true,
+                status: response.status,
+                message: response.data.message,
+            };
+        } catch (error: any) {
+            if (error.response) {
+                return {
+                    success: false,
+                    status: error.response.status,
+                    message: error.response.data.error || "An error occurred",
+                };
+            } else {
+                return {
+                    success: false,
+                    status: 500,
+                    message: "Network error, please try again later.",
+                };
+            }
+        }
+    };
+
+    return {
+        register,
+        verifyOtp,
+        login,
+        logout,
+        getUserProfile,
+        requestPermission,
+        isAuthenticated,
+        setIsAuthenticated,
+    };
 };

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://192.168.100.38:8000", // Use Django server's local IP
+  baseURL: "http://localhost:8000", // Use Django server's local IP
   headers: {
     "Content-Type": "application/json",
   },

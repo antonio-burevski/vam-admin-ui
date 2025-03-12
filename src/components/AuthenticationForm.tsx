@@ -11,13 +11,13 @@ import {
 import classes from "../assets/Login.module.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useAuthService } from "../api/authApi"; // Assuming your auth service has the login function
+import { useAuthService } from "../api/authApi";
 import { useAuth } from "../hooks/useAuth";
 
 export function AuthenticationForm() {
   const navigate = useNavigate();
-  const { login } = useAuthService(); // Use the login method from the auth service
-  const { getUser } = useAuth(); // Access getUser from AuthContext
+  const { login } = useAuthService();
+  const { getUser } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);

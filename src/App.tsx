@@ -5,7 +5,7 @@ import ProtectedRoute from "./utils/ProtectedRoute.tsx";
 import {AuthenticationForm} from "./components/AuthenticationForm";
 import ValidationForm from "./components/ValidationForm";
 import {Navbar} from "./components/core/Navbar";
-import {AuthProvider} from "./contexts/AuthProvider";
+import {AuthProvider} from "./utils/AuthProvider.tsx";
 import Account from "./components/core/Account";
 import Dashboard from "./components/core/Dashboard";
 import Settings from "./components/core/Settings";
@@ -46,28 +46,28 @@ const AuthenticatedApp = () => {
 
     if (!user) return null;
 
-  return (
-    <>
-      <Navbar />
-      <Routes>
-        {user.permissions.includes("can_view_dashboard") && (
-          <Route path="/" element={<Dashboard />} />
-        )}
+    return (
+        <>
+            <Navbar/>
+            <Routes>
+                {user.permissions.includes("can_view_dashboard") && (
+                    <Route path="/" element={<Dashboard/>}/>
+                )}
 
-        {user.permissions.includes("can_view_products") && (
-          <Route path="/products" element={<Products />} />
-        )}
+                {user.permissions.includes("can_view_products") && (
+                    <Route path="/products" element={<Products/>}/>
+                )}
 
-        {user.permissions.includes("can_view_account") && (
-          <Route path="/account" element={<Account />} />
-        )}
+                {user.permissions.includes("can_view_account") && (
+                    <Route path="/account" element={<Account/>}/>
+                )}
 
-        {user.permissions.includes("can_view_settings") && (
-          <Route path="/settings" element={<Settings />} />
-        )}
-      </Routes>
-    </>
-  );
+                {user.permissions.includes("can_view_settings") && (
+                    <Route path="/settings" element={<Settings/>}/>
+                )}
+            </Routes>
+        </>
+    );
 };
 
 export default App;

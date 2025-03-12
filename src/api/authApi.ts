@@ -123,8 +123,6 @@ export const useAuthService = () => {
 
         return true;
       }
-            
-
             setIsAuthenticated(false);
             return false;
         } catch (error) {

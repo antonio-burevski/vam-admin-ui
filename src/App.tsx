@@ -3,8 +3,6 @@ import {MantineProvider} from "@mantine/core";
 import RegisterForm from "./components/RegisterForm";
 import ProtectedRoute from "./utils/ProtectedRoute.tsx";
 import {AuthenticationForm} from "./components/AuthenticationForm";
-import ProtectedRoute from "./components/ProtectedRoute";
-import { AuthenticationForm } from "./components/AuthenticationForm";
 import ValidationForm from "./components/ValidationForm";
 import {Navbar} from "./components/core/Navbar";
 import {AuthProvider} from "./contexts/AuthProvider";

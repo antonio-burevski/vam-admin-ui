@@ -1,8 +1,14 @@
-import { Title } from "@mantine/core";
+import {Container, Title} from "@mantine/core";
+import {StatsGroup} from "./mock-containers/StatsGroup.tsx";
+import {StatsGrid} from "./mock-containers/StatsGrid.tsx";
 
 const Dashboard = () => {
     return (
-        <Title>Dashboard</Title>
+        <Container fluid style={{display: "block", marginTop: "1rem"}}>
+            <Title style={{marginBottom: "1rem"}}>Dashboard</Title>
+            <StatsGrid/>
+            <StatsGroup/>
+        </Container>
     );
 };
 

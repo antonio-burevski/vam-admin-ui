@@ -28,7 +28,7 @@ export function AuthenticationForm() {
     const success = await login(username, password);
     if (success) {
       await getUser(); // Ensure user data is loaded before navigation
-      navigate("/"); // Now navigate only after user is set
+      navigate("/");
     } else {
       setError("Invalid credentials. Please try again.");
     }
@@ -44,7 +44,7 @@ export function AuthenticationForm() {
         {/* username Input */}
         <TextInput
           label="Username"
-          placeholder="hello@gmail.com"
+          placeholder="Your Username"
           size="md"
           value={username}
           onChange={(e) => setUsername(e.target.value)}

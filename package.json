@@ -13,7 +13,8 @@
     "@mantine/core": "^7.15.1",
     "@mantine/form": "^7.15.2",
     "@mantine/hooks": "^7.15.1",
-    "@mantine/notifications": "^7.17.0",
+    "@mantine/notifications": "^7.17.4",
+    "@tabler/icons-react": "^3.31.0",
     "axios": "^1.7.9",
     "react": "^18.3.1",
     "react-cookie": "^7.2.2",
@@ -33,5 +34,6 @@
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.1",
     "vite": "^6.0.3"
-  }
+  },
+  "proxy": "http://127.0.0.1:8000"
 }

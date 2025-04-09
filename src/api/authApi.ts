@@ -1,115 +1,73 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
-import axiosInstance from "./axiosInstance";
+import axiosInstance, {axiosPublicInstance, fetchCsrfToken} from "./axiosInstance";
 import {useState} from "react";
+import {extractErrorMessage} from "../utils/coreUtils.ts";
 
 export const useAuthService = () => {
-    const [cookies, setCookie, removeCookie] = useCookies(["token"]); // Access token from cookies
+    const [cookies, setCookie, removeCookie] = useCookies(["token"]);
     const navigate = useNavigate();
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!cookies.token);
 
-    // Check if the user is already logged in
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-        !!cookies.token
-    );
+    // Helper function to store tokens
+    const storeTokens = (accessToken: string, refreshToken: string) => {
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 7); // 7 days expiration
 
-    // Register method (Initial Step: Sends OTP)
-    const register = async (
-        username: string,
-        email: string,
-        password: string
-    ) => {
+        setCookie("token", accessToken, {
+            path: "/",
+            expires,
+            secure: true,
+            sameSite: "strict",
+        });
+
+        document.cookie = `refresh_token=${refreshToken}; path=/; expires=${expires.toUTCString()}; secure; SameSite=Strict`;
+    };
+
+    // 🔹 Register User (Public Route)
+    const register = async (username: string, email: string, password: string) => {
         try {
-            // No need for token here, as the route is public
-            const response = await axiosInstance.post("/core/register/", {
+            const response = await axiosPublicInstance.post("/core/register/", {
                 username,
                 email,
                 password,
             });
-
             console.log("Registration successful, verify OTP");
             return {success: true, message: response.data.message};
         } catch (error: any) {
-            console.error(
-                "Registration failed:",
-                error.response?.data?.message || error.message
-            );
-            return {
-                success: false,
-                message: error.response?.data?.message || "Registration failed",
-            };
+            const message =
+                extractErrorMessage(error.response?.data) || error.message;
+            console.error("Registration failed:", message);
+            return {success: false, message};
         }
     };
 
-    // OTP Verification Method
+    // 🔹 Verify OTP (Public Route)
     const verifyOtp = async (email: string, otp: string) => {
         try {
-            // No need for token here, as the route is public
-            const response = await axiosInstance.post("/core/verify-otp/", {
-                email,
-                otp,
-            });
+            await axiosInstance.post("/core/verify-otp/", {email, otp});
 
-            const expires = new Date();
-            expires.setDate(expires.getDate() + 7); // Set cookie expiration date to 7 days from now
-            // Set the token in cookies upon successful OTP verification
-
-            setCookie("token", response.data.token, {
-                path: "/login",
-                expires,
-                secure: true,
-                sameSite: "strict",
-            });
-
-            // Redirect to dashboard
-            navigate("/");
-            // Redirect to the homepage or dashboard
-            navigate("/");
-
+            // ✅ No token storage, no redirect, only return success
             return {success: true, message: "Account activated successfully"};
         } catch (error: any) {
-            console.error(
-                "OTP verification failed:",
-                error.response?.data?.message || error.message
-            );
-            return {
-                success: false,
-                message: error.response?.data?.message || "Invalid OTP",
-            };
+            console.error("OTP verification failed:", error.response?.data?.message || error.message);
+            return {success: false, message: error.response?.data?.message || "Invalid OTP"};
         }
     };
 
-    // Login method
+    // 🔹 Login (Stores Tokens)
     const login = async (username: string, password: string) => {
-
         try {
-            const response = await axiosInstance.post("/core/login/", {
-                username,
-                password,
-            });
+            const response = await axiosInstance.post("/core/login/", {username, password});
 
-            const accessToken = response.data.access_token;
-            const refreshToken = response.data.refresh_token;
+            storeTokens(response.data.access_token, response.data.refresh_token);
 
-            if (accessToken) {
-                setIsAuthenticated(true);
+            // Fetch new CSRF token after login
+            await fetchCsrfToken();
 
-                // Store the access token in a regular cookie
-                const expires = new Date();
-                expires.setDate(expires.getDate() + 7); // Set expiration for the access token
-                setCookie("token", accessToken, {
-                    path: "/",
-                    expires,
-                    secure: true,
-                    sameSite: "strict",
-                });
-
-                document.cookie = `refresh_token=${refreshToken}; path=/; expires=${expires.toUTCString()}; secure; HttpOnly; SameSite=Strict`;
-
-                return true;
-            }
-            setIsAuthenticated(false);
-            return false;
+            setIsAuthenticated(true);
+            return true;
         } catch (error) {
             setIsAuthenticated(false);
             console.error("Login failed:", error);
@@ -117,13 +75,20 @@ export const useAuthService = () => {
         }
     };
 
-    // Logout method
-    const logout = () => {
+    // Logout (Clears Tokens)
+    const logout = async () => {
         removeCookie("token", {path: "/"});
+        document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+
+        // Fetch new CSRF token after logout to reset session security
+        await fetchCsrfToken();
+
         setIsAuthenticated(false);
-        navigate("/login"); // Redirect to login page after logout
+        navigate("/login");
     };
 
+
+    // 🔹 Fetch User Profile (Requires Authentication)
     const getUserProfile = async () => {
         try {
             const response = await axiosInstance.get("/core/user-profile/");
@@ -134,6 +99,7 @@ export const useAuthService = () => {
         }
     };
 
+    // 🔹 Request Permission (Requires Authentication)
     const requestPermission = async (permission_codename: string) => {
         try {
             const response = await axiosInstance.post("/core/request-permission/", {

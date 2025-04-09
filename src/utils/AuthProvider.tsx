@@ -7,7 +7,7 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
     const {getUserProfile, isAuthenticated} = useAuthService();
     const [user, setUser] = useState<IUserProfile | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const getUser = useCallback(async (): Promise<IUserProfile | null> => {
         if (isAuthenticated && user) return user; // Return cached user if available
@@ -29,14 +29,15 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
 
     // Fetch user profile on mount if authenticated
     useEffect(() => {
-        const fetchUser = async () => {
-            if (isAuthenticated && !user) {
-                await getUser();
-            }
-            setLoading(false);
-        };
-
-        fetchUser();
+        // const fetchUser = async () => {
+        //     setLoading(true)
+        //     if (isAuthenticated && !user) {
+        //         await getUser();
+        //     }
+        //     setLoading(false);
+        // };
+        //
+        // fetchUser();
     }, [isAuthenticated, getUser]);
 
     return (

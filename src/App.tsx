@@ -12,10 +12,13 @@ import Settings from "./components/core/Settings";
 import {useAuth} from "./hooks/useAuth";
 import Products from "./components/core/Products";
 import NotFoundPage from "./utils/NotFoundPage.tsx";
+import {Notifications} from "@mantine/notifications";
+import '@mantine/notifications/styles.css'
 
 function App() {
     return (
         <MantineProvider defaultColorScheme="dark">
+            <Notifications/>
             <Router>
                 <AuthProvider>
                     <Routes>
@@ -26,13 +29,15 @@ function App() {
 
                         {/* Private Routes */}
                         <Route
-                            path="/"
+                            path="/*"
                             element={
                                 <ProtectedRoute>
                                     <AuthenticatedApp/>
                                 </ProtectedRoute>
                             }
                         />
+
+                        {/* Fallback for unknown routes */}
                         <Route path="*" element={<NotFoundPage/>}/>
                     </Routes>
                 </AuthProvider>
@@ -47,26 +52,19 @@ const AuthenticatedApp = () => {
     if (!user) return null;
 
     return (
-        <>
+        <div style={{display: "flex"}}>
             <Navbar/>
             <Routes>
-                {user.permissions.includes("can_view_dashboard") && (
-                    <Route path="/" element={<Dashboard/>}/>
-                )}
-
-                {user.permissions.includes("can_view_products") && (
-                    <Route path="/products" element={<Products/>}/>
-                )}
-
-                {user.permissions.includes("can_view_account") && (
-                    <Route path="/account" element={<Account/>}/>
-                )}
-
-                {user.permissions.includes("can_view_settings") && (
-                    <Route path="/settings" element={<Settings/>}/>
-                )}
+                <Route path="/dashboard"
+                       element={user.permissions.includes("can_view_dashboard") ? <Dashboard/> : <NotFoundPage/>}/>
+                <Route path="/products"
+                       element={user.permissions.includes("can_view_products") ? <Products/> : <NotFoundPage/>}/>
+                <Route path="/account"
+                       element={user.permissions.includes("can_view_products") ? <Account/> : <NotFoundPage/>}/>
+                <Route path="/settings"
+                       element={user.permissions.includes("can_view_settings") ? <Settings/> : <NotFoundPage/>}/>
             </Routes>
-        </>
+        </div>
     );
 };
 
